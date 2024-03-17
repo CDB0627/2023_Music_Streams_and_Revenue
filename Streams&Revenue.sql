@@ -20,6 +20,11 @@ SELECT Platform , SUM(Stream_Count) AS Platform_Streams
 FROM StreamsandRevenue
 GROUP BY Platform;
 
+# Average revenue per platform per state
+SELECT State, Platform, ROUND(AVG(Revenue), 2) As Avg_Revenue
+From StreamsandRevenue
+GROUP BY State, Platform; 
+	
 # Streams CTE created & we'll rank the platforms based upon who had the most streams
 WITH Streams_CTE AS (
 SELECT Platform , SUM(Stream_Count) AS Platform_Streams, ROW_NUMBER() OVER(ORDER BY SUM(Stream_Count) DESC) AS Platform_Rank
@@ -199,6 +204,21 @@ CASE
 END AS Adult_Classification
 FROM StreamsandRevenue
 GROUP BY Platform, Demographic;
+
+# Max & Min streams per song
+SELECT Song_Title, Category, MAX(Stream_Count) AS Max_Streams, MIN(Stream_Count) AS Min_Streams, AVG(Revenue_Per_Stream) as Avg_RevenuePerStream, MAX(Revenue) AS Max_Revenue, MIN(Revenue) as Min_Revenue
+FROM StreamsandRevenue
+GROUP BY Song_Title, Category;
+
+# Max & Min streams per category 
+SELECT Category, MAX(Stream_Count) AS Max_Streams, MIN(Stream_Count) AS Min_Streams
+FROM StreamsandRevenue
+GROUP BY Category; 
+
+# Max & Min streams per category per platform
+SELECT Platform, Category, MAX(Stream_Count) AS Max_Streams, MIN(Stream_Count) AS Min_Streams
+FROM StreamsandRevenue
+GROUP BY Platform, Category; 
 
 
 
