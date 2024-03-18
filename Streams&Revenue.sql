@@ -24,6 +24,21 @@ GROUP BY Platform;
 SELECT State, Platform, ROUND(AVG(Revenue), 2) As Avg_Revenue
 From StreamsandRevenue
 GROUP BY State, Platform; 
+
+# Average stream count per state per demographic
+SELECT State, Demographic, AVG(Stream_Count) as Avg_StreamsPerDemo
+FROM StreamsandRevenue
+GROUP BY State, Demographic;
+
+# I will use a subquery in this example to see which category has the most streams in each state
+SELECT State, Category, total_streams
+FROM (SELECT State, Category, SUM(Stream_Count) as total_streams, ROW_NUMBER() OVER (PARTITION BY state ORDER BY SUM(stream_count) DESC) AS category_rank FROM StreamsandRevenue GROUP BY State, Category) AS ranked_categories
+WHERE category_rank = 1;
+
+# I will use a subquery again to see which song is streamed the most in each state
+SELECT State, Song_Title, total_streams
+FROM (SELECT State, Song_Title, SUM(Stream_Count) as total_streams, ROW_NUMBER() OVER (PARTITION BY state ORDER BY SUM(stream_count) DESC) AS song_rank FROM StreamsandRevenue GROUP BY State, Song_Title) AS ranked_songs
+WHERE song_rank = 1;
 	
 # Streams CTE created & we'll rank the platforms based upon who had the most streams
 WITH Streams_CTE AS (
@@ -75,17 +90,11 @@ WHERE Demographic = '55+'
 GROUP BY Demographic,Platform)
 SELECT * FROM EATempStreamCounts;
 
-#I'll write join statements to query off of the views created.
+#I'll write join statements to query off of the views created to compare which platform is being utilized by each demographic.
 SELECT *
 FROM YOUNGADULTDEMOGRAPICSTREAMS AS YA
 JOIN ADULTDEMOGRAPICSTREAMS AS AA
-ON YA.Platform = AA.Platform
-JOIN MIDDLEADULTDEMOGRAPICSTREAMS AS MA
-ON AA.Platform = MA.Platform
-JOIN MOREMIDDLEADULTDEMOGRAPICSTREAMS AS MMA
-ON MA.Platform = MMA.Platform
-JOIN ELDERADULTDEMOGRAPICSTREAMS AS EA
-ON MMA.Platform = EA.platform;
+ON YA.Platform = AA.Platform;
 
 # Another way to do this would be to use a Union clause but it's best if the tables have identical columns - otherwise you could potentially have null values & unorganized data. I'll show an example of a union.
 SELECT Demographic, Platform, Total_Streams
